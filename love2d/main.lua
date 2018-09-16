@@ -4,7 +4,7 @@ local socket = require "socket"
 local net = require "net"
 local fly = require "fly"
 
-local sendInterval = 5
+local sendInterval = 10
 local activateMouse = true
 
 
@@ -116,10 +116,13 @@ function serializeMotorValues(values)
 	if not values then return "nil" end
 	
 	return stringify({
-		constrain( round(values[1] * 1023), 0, 1023 ),
-		constrain( round(values[2] * 1023), 0, 1023 ),
-		constrain( round(values[3] * 1023), 0, 1023 ),
-		constrain( round(values[4] * 1023), 0, 1023 ),
+		option = "fly",
+		motors = {
+			constrain( round(values[1] * 1023), 0, 1023 ),
+			constrain( round(values[2] * 1023), 0, 1023 ),
+			constrain( round(values[3] * 1023), 0, 1023 ),
+			constrain( round(values[4] * 1023), 0, 1023 ),
+		}
 	})
 end
 
@@ -168,6 +171,7 @@ function love.load()
 	
 	mode = 0
 	udpConnected = false
+	active = false
 	
 	require "ui" -- Build the UI
 end
@@ -188,28 +192,25 @@ function love.update(dt)
 		end
 	end
 
-	t = t + dt
-
-	if t > 1/sendInterval then
-		t = t - (1/sendInterval)
-		fly.translateControls()
-		networkControls = serializeMotorValues(fly.motors)
-	end
-
 	-- UDP Send controls to NodeMCU
 	if udpConnected then
-		t = t + dt
-
-		if t > 1/sendInterval then
-			t = t - (1/sendInterval)
-			fly.translateControls()
-			net.send( serializeMotorValues(fly.motors) )
+		if active then
+			t = t + dt
+			
+			if t > 1/sendInterval then
+				t = t - (1/sendInterval)
+				fly.translateControls()
+				net.send( serializeMotorValues(fly.motors) )
+			end
 		end
-
+		
 		-- UDP Receive sensor values from NodeMCU
 		net.receive(function(data)
-			log( data.data )
-			sensors = unserialize(data.data)
+			log( data )
+			data = unserialize(data)
+			if data.type == "start" and data.message == "true" then
+				active = true
+			end
 		end)
 	end
 end
