@@ -1,6 +1,6 @@
 -- CONSTANTS
 
-local sensor = require "sensor"
+-- local sensor = require "sensor"
 
 local bootCodes = {
 	[0] = "Power-on",
@@ -83,7 +83,7 @@ function responses.start()
 	})
 end
 
-function responses.stop(data)
+function responses.stop()
 	for i = 1, 4 do
 		pwm.setduty( motorPins[i], 0 )
 		pwm.stop( motorPins[i] )
@@ -97,29 +97,32 @@ end
 
 -- Controller sends motor values, respond with sensor values
 function responses.fly(data)
-	return stringify({
-		type = "sensor",
-		acc = {x = 5, y = 4, z = 3}
-	})
-	
-	--[[-- Set motors
+	-- Set motors
 	pwm.setduty( motorPins[1], data.motors[1] )
 	pwm.setduty( motorPins[2], data.motors[2] )
 	pwm.setduty( motorPins[3], data.motors[3] )
 	pwm.setduty( motorPins[4], data.motors[4] )
 	
 	-- Read sensors
-	local acc = sensor.read("acc", true)
-	local gyro = sensor.read("gyro", true)
-	local mag = sensor.read("mag", true)
+	-- local acc = sensor.read("acc", true)
+	-- local gyro = sensor.read("gyro", true)
+	-- local mag = sensor.read("mag", true)
 	
 	-- Return
-	return stringify({
+	-- return stringify({
+	-- 	type = "sensor",
+	-- 	data.motors[1],
+	-- 	data.motors[2],
+	-- 	data.motors[3],
+	-- 	data.motors[4]
+	-- })
+	
+	--[[ return stringify({
 		type = "sensor",
 		acc = { x = acc.x, y = acc.y, z = acc.z },
 		gyro = { x = gyro.x, y = gyro.y, z = gyro.z },
 		mag = { x = mag.x, y = mag.y, z = mag.z },
-	})--]]
+	}) ]]
 end
 
 function responses.calibration(data, socket, port, ip)
@@ -198,7 +201,7 @@ end)
 
 -- Setup motor pin pwm frequencies to 500 Hz (arbitrarily chosen)
 -- ( pin, clock [1-1000]Hz, duty [0-1023] )
--- pwm.setup( motorPins[1], 500, 0 )
--- pwm.setup( motorPins[2], 500, 0 )
--- pwm.setup( motorPins[3], 500, 0 )
--- pwm.setup( motorPins[4], 500, 0 )
+pwm.setup( motorPins[1], 500, 0 )
+pwm.setup( motorPins[2], 500, 0 )
+pwm.setup( motorPins[3], 500, 0 )
+pwm.setup( motorPins[4], 500, 0 )
