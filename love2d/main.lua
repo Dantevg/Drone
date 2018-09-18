@@ -263,9 +263,3 @@ end
 function love.mousepressed( x, y, button )
 	GUIs[mode]:event( "click", x, y, button )
 end
-
-function love.keypressed(key)
-	if key == "lctrl" then
-		debug.debug()
-	end
-end
