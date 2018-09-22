@@ -3,3 +3,4 @@ nodemcu/main_old.lua
 
 *.exe
 *.ttf
+*.ini
