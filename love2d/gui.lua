@@ -61,14 +61,14 @@ GUI.draw = GUI.drawObjects
 
 -- Execute event functions
 function GUI:event( event, ... )
-  for _, v in ipairs(self.objects) do
+	for _, v in ipairs(self.objects) do
 		if type( v[event] ) == "function" then
 			v[event](v, ...)
 		end
 		if v.objects then
 			v:event( event, ... )
 		end
-  end
+	end
 end
 
 -- Find elements by ID

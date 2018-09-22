@@ -17,9 +17,9 @@ function round(n, decimals)
 	local mult = 10 ^ ( decimals or 0 )
 	if n >= 0 then
 		return math.floor(n * mult + 0.5) / mult
-  else
+	else
 		return math.ceil(n * mult - 0.5) / mult
-  end
+	end
 end
 
 function constrain( val, min, max )

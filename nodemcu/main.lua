@@ -139,7 +139,7 @@ end
 -- CALLBACK FUNCTIONS
 
 function receive(socket, data, port, ip)
-	log( "UDP Receive from " .. ip .. " at port " .. port ..  ":", data )
+	log( "UDP Receive from " .. ip .. " at port " .. port .. ":", data )
 	data = loadstring("return " .. data)()
 	log( data.option )
 	
