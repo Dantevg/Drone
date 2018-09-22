@@ -18,7 +18,7 @@ function round(n, decimals)
 	if n >= 0 then
 		return math.floor(n * mult + 0.5) / mult
   else
-  	return math.ceil(n * mult - 0.5) / mult
+		return math.ceil(n * mult - 0.5) / mult
   end
 end
 
@@ -35,7 +35,7 @@ function lerp( v1, v2, t )
 end
 
 function lerpColor( rgb1, rgb2, t )
-	return 
+	return
 		lerp( rgb1[1], rgb2[1], t ),
 		lerp( rgb1[2], rgb2[2], t ),
 		lerp( rgb1[3], rgb2[3], t )

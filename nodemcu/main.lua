@@ -31,8 +31,6 @@ local motorPins = {
 	3, 4,
 }
 
-local sensorInterval = 1000 -- Delay between sensor readings (in ms)
-
 
 
 
@@ -184,19 +182,19 @@ log("UDP Started")
 log("Searching for networks...")
 wifi.sta.getap(function(list)
 	for ssid,v in pairs(list) do
-    local authmode, rssi, bssid, channel = string.match(v, "([^,]+),([^,]+),([^,]+),([^,]+)")
-    for i = 1, #apList do
-    	if ssid == apList[i].ssid then
-    		-- Connect
-    		log("Connecting to " .. ssid .. "...")
-    		wifi.sta.config({ ssid = apList[i].ssid, pwd = apList[i].pwd, auto = false })
-    		wifi.sta.connect(function()
-    			log("Wifi connected")
-  			end)
-    		return
-    	end
-    end
-  end
+		local authmode, rssi, bssid, channel = string.match(v, "([^,]+),([^,]+),([^,]+),([^,]+)")
+		for i = 1, #apList do
+			if ssid == apList[i].ssid then
+				-- Connect
+				log("Connecting to " .. ssid .. "...")
+				wifi.sta.config({ ssid = apList[i].ssid, pwd = apList[i].pwd, auto = false })
+				wifi.sta.connect(function()
+					log("Wifi connected")
+				end)
+				return
+			end
+		end
+	end
 end)
 
 -- Setup motor pin pwm frequencies to 500 Hz (arbitrarily chosen)

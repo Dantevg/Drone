@@ -41,7 +41,7 @@ function modules.text:new( parent, d )
 		
 		text = d.text or "",
 		
-		mt = { __newindex = function(self)
+		mt = { __newindex = function()
 			return function( t, k, v )
 				self[k] = v
 				self:update()
@@ -117,6 +117,8 @@ function modules.button:draw()
 		love.graphics.setColor( unpack(self.border) )
 		love.graphics.rectangle( "line", x, y, self.w, self.h )
 	end
+	
+	love.graphics.setColor( r, g, b, 1 )
 	
 	self:drawObjects()
 end

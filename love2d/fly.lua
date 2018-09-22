@@ -78,7 +78,6 @@ module.calibrating = false -- false, "sensors", "motors"
 -- CONTROL FUNCTIONS
 
 function module.translateControls() -- Apply the masks
-	local n = 0
 	for k, v in pairs(module.defaults) do -- Defaults
 		module.motors[1] = module.defaults[k][1] + 1
 		module.motors[2] = module.defaults[k][2] + 1
