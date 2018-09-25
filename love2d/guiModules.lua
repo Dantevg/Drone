@@ -51,12 +51,15 @@ function modules.text:new( parent, d )
 end
 
 function modules.text:draw()
+	local r, g, b = love.graphics.getColor() -- Get color for resetting
 	local x = self.calc.x
 	local y = self.calc.y
 	
 	love.graphics.draw( self.textElement, x, y + (self.parent.h - self.textElement:getHeight())/2 )
 	
 	self:drawObjects()
+	
+	love.graphics.setColor( r, g, b, 1 )
 end
 
 

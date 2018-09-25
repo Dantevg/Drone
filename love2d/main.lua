@@ -218,6 +218,8 @@ end
 function love.draw()
 	GUIs[mode]:draw()
 	
+	love.graphics.setColor( 255, 255, 255, 255 )
+	
 	-- Middle line
 	love.graphics.line( width/2, 0, width/2, height*0.8 )
 
