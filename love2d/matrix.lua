@@ -1,5 +1,11 @@
--- Matrix module
--- by RedPolygon
+--[[
+	
+	MATRIX MODULE
+	by RedPolygon
+	
+	All functions (except fill) return new matrices
+	
+--]]
 
 -- INITIALIZE
 
@@ -16,7 +22,11 @@ function matrix.new( rows, cols )
 	local m = {}
 	
 	if type(rows) == "table" then -- Filled matrix
-		m = rows
+		if type(rows[1]) == table then
+			m = rows
+		else -- Vector (basically 1D matrix)
+			m = matrix.vectorToMatrix(rows)
+		end
 	else -- Empty matrix
 		for row = 1, rows do
 			m[row] = {}
@@ -24,6 +34,21 @@ function matrix.new( rows, cols )
 				m[row][col] = 0
 			end
 		end
+	end
+	
+	m.rows = #m
+	m.cols = #m[1]
+	m.width = m.cols
+	m.height = m.rows
+	
+	return setmetatable( m, mt )
+end
+
+function matrix.vectorToMatrix(v)
+	local m = {}
+	
+	for i = 1, #v do
+		m[i] = {v[i]}
 	end
 	
 	return setmetatable( m, mt )
@@ -109,23 +134,20 @@ function matrix.scale( m1, amount )
 end
 
 -- Matrix product
-function matrix.product( m1, m2 )
-	if #m1 ~= #m2[1] then
-		error("Width of a not equal to height of b")
+function matrix.product( a, b )
+	-- Multiplying matrices or vector(s)
+	if a.cols ~= b.rows then
+		error("Cols of A not equal to rows of B")
 	end
 	
 	local m = {}
 	
-	if #m1 > #m2 then
-		m1, m2 = m2, m1 -- Swap values
-	end
-	
-	for row = 1, #m1 do
+	for row = 1, a.rows do -- For each row of A
 		m[row] = {}
-		for col = 1, #m2[row] do
+		for col = 1, b.cols do -- For each col of B
 			local sum = 0
-			for i = 1, #m2 do
-				sum = sum + m1[row][i] * m2[i][col]
+			for i = 1, b.rows do -- For each col of A / row of B
+				sum = sum + a[row][i] * b[i][col]
 			end
 			m[row][col] = sum
 		end
@@ -168,12 +190,12 @@ function matrix.tostring(m)
 	
 	for row = 1, #m do
 		for col = 1, #m[row] do
-			str = str .. m[row][col] .. "  "
+			str = str .. m[row][col] .. "\t"
 		end
 		str = str .. "\n"
 	end
 	
-	return str
+	return string.sub( str, 1, -2 ) -- Trim last newline
 end
 
 
