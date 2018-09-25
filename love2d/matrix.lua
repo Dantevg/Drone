@@ -22,7 +22,7 @@ function matrix.new( rows, cols )
 	local m = {}
 	
 	if type(rows) == "table" then -- Filled matrix
-		if type(rows[1]) == table then
+		if type(rows[1]) == "table" then
 			m = rows
 		else -- Vector (basically 1D matrix)
 			m = matrix.vectorToMatrix(rows)
