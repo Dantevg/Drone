@@ -211,6 +211,7 @@ function love.update(dt)
 			if data.type == "start" and data.message == "true" then
 				active = true
 			end
+			fly.orientate(data)
 		end)
 	end
 end
