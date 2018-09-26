@@ -1,5 +1,7 @@
 -- CONSTANTS
 
+local matrix = require "matrix"
+
 local module = {}
 
 module.motorPins = {
@@ -18,34 +20,34 @@ module.sensorInterval = 1000 -- Delay between sensor readings (in ms)
 -- FRONT LEFT (cw),	FRONT RIGHT (ccw),
 -- BACK LEFT (ccw),	BACK RIGHT (cw)
 module.masks = {
-	power = { -- Default
-		1, 1,
-		1, 1,
+	power = matrix{ -- Default
+		{1, 1},
+		{1, 1},
 	},
-	yaw = { -- Turn right
-		-1,  1,
-		 1, -1,
+	yaw = matrix{ -- Turn right
+		{-1, 1},
+		{ 1,-1},
 	},
-	pitch = { -- Forward
-		-1, -1,
-		 1,  1,
+	pitch = matrix{ -- Forward
+		{-1, -1},
+		{ 1,  1},
 	},
-	roll = { -- Right
-		1, -1,
-		1, -1,
+	roll = matrix{ -- Right
+		{1, -1},
+		{1, -1},
 	},
 }
 
 module.defaults = {
-	calibration = {
-		0, 0,
-		0, 0,
-	}
+	calibration = matrix{
+		{0, 0},
+		{0, 0},
+	},
 }
 
-module.motors = {
-	0, 0,
-	0, 0,
+module.motors = matrix{
+	{0, 0},
+	{0, 0},
 }
 
 module.orientation = {
@@ -79,23 +81,15 @@ module.calibrating = false -- false, "sensors", "motors"
 
 function module.translateControls() -- Apply the masks
 	for k, v in pairs(module.defaults) do -- Defaults
-		module.motors[1] = module.defaults[k][1] + 1
-		module.motors[2] = module.defaults[k][2] + 1
-		module.motors[3] = module.defaults[k][3] + 1
-		module.motors[4] = module.defaults[k][4] + 1
+		module.motors = module.defaults[k] + 1
 	end
-	
+
 	for k, v in pairs(module.masks) do -- Controls
 		if k == "power" then
-			module.motors[1] = module.motors[1] * (module.masks[k][1] * controls[k])
-			module.motors[2] = module.motors[2] * (module.masks[k][2] * controls[k])
-			module.motors[3] = module.motors[3] * (module.masks[k][3] * controls[k])
-			module.motors[4] = module.motors[4] * (module.masks[k][4] * controls[k])
+			module.motors = module.motors * (module.masks[k] * controls[k])
 		else
-			module.motors[1] = module.motors[1] * (module.masks[k][1] * 0.2 * controls[k]^2 + 1)
-			module.motors[2] = module.motors[2] * (module.masks[k][2] * 0.2 * controls[k]^2 + 1)
-			module.motors[3] = module.motors[3] * (module.masks[k][3] * 0.2 * controls[k]^2 + 1)
-			module.motors[4] = module.motors[4] * (module.masks[k][4] * 0.2 * controls[k]^2 + 1)
+			local scale = 0.2 * controls[k] * math.abs(controls[k])
+			module.motors = module.motors * (module.masks[k] * scale + 1)
 		end
 	end
 end
@@ -106,21 +100,59 @@ end
 
 -- OTHER FUNCTIONS
 
+-- Return rotation matrix of given axis and angle
+function module.rotate( axis, a )
+	if axis == "x" then -- Pitch
+		return matrix{
+			{1, 0, 0},
+			{0, math.cos(a), -math.sin(a)},
+			{0, math.sin(a), math.cos(a)},
+		}
+	elseif axis == "y" then -- Roll
+		return matrix{
+			{math.cos(a), 0, math.sin(a)},
+			{0, 1, 0},
+			{-math.sin(a), 0, math.cos(a)},
+		}
+	elseif axis == "z" then -- Yaw
+		return matrix{
+			{math.cos(a), -math.sin(a), 0},
+			{math.sin(a), math.cos(a), 0},
+			{0, 0, 1},
+		}
+	end
+end
+
 function module.calibrateMotors() -- TODO: make calibrating function
-	
 	
 end
 
 -- Update the sensor data and covert it
-function module.updateOrientation()
+function module.orientate(sensorData)
+	local pos = module.orientation.position
+	local rot = module.orientation.rotation
+	local interval = module.sensorInterval / 1000
+
+	if sensorData then
+		-- Set sensor data
+		module.sensors.acc.acc = matrix{ sensorData.acc.x, sensorData.acc.y, sensorData.acc.z }
+		module.sensors.gyro.acc = matrix{ sensorData.gyro.x, sensorData.gyro.y, sensorData.gyro.z }
+	end
+
 	-- Convert linear and angular acceleration to speed and position (relative to the drone, not the earth)
-	module.orientation.position.acc = sensors.acc
-	module.orientation.position.spd = vector.add( orientation.position.spd, vector.scale(orientation.position.acc, sensorInterval/1000) )
-	module.orientation.position.pos = vector.add( orientation.position.pos, vector.scale(orientation.position.spd, sensorInterval/1000) )
-	
-	module.orientation.rotation.acc = sensors.gyro
-	module.orientation.rotation.spd = vector.add( orientation.rotation.spd, vector.scale(orientation.rotation.acc, sensorInterval/1000) )
-	module.orientation.rotation.pos = vector.add( orientation.rotation.pos, vector.scale(orientation.rotation.spd, sensorInterval/1000) )
+	pos.acc = module.sensors.acc
+	pos.spd = pos.spd + pos.acc * interval
+	pos.pos = pos.pos + pos.spd * interval
+
+	rot.acc = module.sensors.gyro
+	rot.spd = rot.spd + rot.acc * interval
+	rot.pos = rot.pos + rot.spd * interval
+
+	-- Convert linear orientation to be relative to the earth
+	-- Matrix product of rotation matrix and position vector
+	pos.pos = module.rotate( "x", rot.pos.x ) * pos.pos
+	pos.pos = module.rotate( "y", rot.pos.y ) * pos.pos
+	pos.pos = module.rotate( "z", rot.pos.z ) * pos.pos
 end
 
 
