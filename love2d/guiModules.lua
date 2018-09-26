@@ -39,9 +39,11 @@ function modules.text:new( parent, d )
 		y = d.y or 0,
 		align = d.align or "center",
 		
+		color = d.color or {255,255,255,255},
+		
 		text = d.text or "",
 		
-		mt = { __newindex = function()
+		mt = { __newindex = function(self)
 			return function( t, k, v )
 				self[k] = v
 				self:update()
@@ -51,7 +53,8 @@ function modules.text:new( parent, d )
 end
 
 function modules.text:draw()
-	local r, g, b = love.graphics.getColor() -- Get color for resetting
+	local prevColor = { love.graphics.getColor() } -- Get color for resetting
+	love.graphics.setColor(self.color)
 	local x = self.calc.x
 	local y = self.calc.y
 	
@@ -59,7 +62,7 @@ function modules.text:draw()
 	
 	self:drawObjects()
 	
-	love.graphics.setColor( r, g, b, 1 )
+	love.graphics.setColor(prevColor)
 end
 
 
@@ -102,7 +105,7 @@ function modules.button:new( parent, d )
 end
 
 function modules.button:draw()
-	local r, g, b = love.graphics.getColor() -- Get color for resetting
+	local prevColor = { love.graphics.getColor() } -- Get color for resetting
 	local x = self.calc.x
 	local y = self.calc.y
 	
@@ -121,7 +124,7 @@ function modules.button:draw()
 		love.graphics.rectangle( "line", x, y, self.w, self.h )
 	end
 	
-	love.graphics.setColor( r, g, b, 1 )
+	love.graphics.setColor(prevColor)
 	
 	self:drawObjects()
 end
