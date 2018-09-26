@@ -111,9 +111,7 @@ function matrix.mul( m1, m2 )
 	if type(m2) == "number" then
 		return matrix.scale( m1, m2 )
 	else
-		return matrix.loop( m1, m2, function(a,b)
-			return a * b
-		end)
+		return matrix.product( m1, m2 )
 	end
 end
 
