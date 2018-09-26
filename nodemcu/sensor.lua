@@ -1,7 +1,21 @@
--- Sensor code for LSM9DS1
--- Acc: accelerometer
--- Gyro: gyroscope
--- Mag: magnetometer
+--[[
+	
+	SENSOR MODULE
+	by RedPolygon
+	
+	Sensors:
+		- acc			accelerometer
+		- gyro		gyroscope
+		- mag			magnetometer
+	
+	Sensor data format (following standard conventions)
+	(position / rotation):
+		- x / roll		front	/ right wing down
+		- y / pitch		right	/ nose up
+		- z / yaw			up		/ turn left
+	
+--]]
+
 local module = {}
 
 -- CONSTANTS
@@ -184,26 +198,8 @@ function module.calibrate(callback)
 	end
 end
 
--- Converts sensor data to match the format:
--- x / roll: right
--- y / pitch: forward
--- z / yaw: up / turn right
-function convert(sensor, sensorData)
-	if sensor == "acc" then
-		-- Swap x and y
-		return { x = sensorData.y, y = sensorData.x, z = sensorData.z }
-	elseif sensor == "gyro" then
-		-- Flip all directions
-		return { x = -sensorData.y, y = sensorData.x, z = -sensorData.z }
-		-- return { yaw = -sensorData.z, pitch = -sensorData.y, roll = sensorData.x }
-	elseif sensor == "mag" then
-		-- Swap x and y
-		return { x = sensorData.y, y = sensorData.x, z = sensorData.z }
-	end
-end
-
 -- Reads the sensor values
-function module.read(sensor, convert)
+function module.read(sensor)
 	if sensor ~= "acc" and sensor ~= "gyro" and sensor ~= "mag" then
 		error("Invalid sensor type: " .. (sensor ~= nil and sensor or "nil"))
 	end
@@ -235,11 +231,7 @@ function module.read(sensor, convert)
 	sensorData.y = sensorData.y - calibration[sensor].y
 	sensorData.z = sensorData.z - calibration[sensor].z
 	
-	if convert then
-		return convert(sensor, sensorData)
-	else
-		return sensorData
-	end
+	return convert(sensor, sensorData)
 end
 
 -- Sets the acc's control registers
