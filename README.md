@@ -30,7 +30,14 @@ The controller needs to be connected to the wifi network the NodeMCU creates. Af
 3. This is for a school project, but I will keep updating it afterwards
 4. I use tabs for indentation (as you should ;)
    so don't freak out when you see a 8-space indentation, that's just your browser
-5. This project is licensed under the MIT license. Use it for whatever you want!
-6. If you found anything here hepful or you have a question, please let me know (I would love to hear)
+5. If you found anything here hepful or you have a question, please let me know (I would love to hear)
+
+## License
+This project is licensed under the MIT license. Use it for whatever you want!
+
+**Other licenses:**  
+[Love2d](https://love2d.org/wiki/License) (ZLIB)  
+[Roboto font](https://github.com/google/roboto/blob/master/LICENSE) (Apache 2.0)  
+[NodeMCU firmware](https://github.com/nodemcu/nodemcu-firmware/blob/master/LICENSE) (MIT)
 
 [firmware]: nodemcu/firmware-adc-bit-file-gpio-i2c-net-node-pwm-tmr-uart-wifi.bin
