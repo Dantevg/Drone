@@ -63,7 +63,7 @@ buttons.mode = GUIs[0]:addChild("button", {
 	objects = {
 		{"text",{
 			id = "title",
-			text = "MODE",
+			text = "MODE (0)",
 		}},
 	},
 	on = {
@@ -111,10 +111,6 @@ buttons.modeDown = buttons.mode:addChild("button", {
 	}
 })
 
-GUIs[1]:addChild(buttons.start)
-GUIs[1]:addChild(buttons.calibrateSensors)
-GUIs[1]:addChild(buttons.mode)
-
 buttons.takeOff = GUIs[1]:addChild("button", {
 	id = "takeOff",
 	x = buttonWidth * 3,
@@ -153,8 +149,18 @@ buttons.land = GUIs[1]:addChild("button", {
 	}
 })
 
+GUIs[1]:addChild(buttons.start)
+GUIs[1]:addChild(buttons.calibrateSensors)
+GUIs[1]:addChild(buttons.mode)
+
+GUIs[2]:addChild(buttons.start)
+GUIs[2]:addChild(buttons.calibrateSensors)
+GUIs[2]:addChild(buttons.mode)
+GUIs[2]:addChild(buttons.takeOff)
+GUIs[2]:addChild(buttons.land)
+
 -- Functions
 function setMode(newMode)
-	mode = newMode % 2
+	mode = newMode % 3
 	buttons.mode:find("title").text = "MODE ("..mode..")"
 end
