@@ -158,9 +158,3 @@ GUIs[2]:addChild(buttons.calibrateSensors)
 GUIs[2]:addChild(buttons.mode)
 GUIs[2]:addChild(buttons.takeOff)
 GUIs[2]:addChild(buttons.land)
-
--- Functions
-function setMode(newMode)
-	mode = newMode % 3
-	buttons.mode:find("title").text = "MODE ("..mode..")"
-end

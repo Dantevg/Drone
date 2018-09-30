@@ -38,6 +38,7 @@ module.masks = {
 	},
 }
 
+-- The default (calibration) masks to apply before steering masks
 module.defaults = {
 	calibration = matrix{
 		{0, 0},
@@ -45,32 +46,31 @@ module.defaults = {
 	},
 }
 
+-- The motor (output) values
 module.motors = matrix{
 	{0, 0},
 	{0, 0},
 }
 
+-- The calculated and desired orientation of the drone (position and rotation)
 module.orientation = {
 	position = {
-		acc = {},
-		spd = {},
-		pos = {},
+		acc = matrix(3,1),
+		spd = matrix(3,1),
+		pos = matrix(3,1),
 	},
 	rotation = {
-		acc = {},
-		spd = {},
-		rot = {},
+		acc = matrix(3,1),
+		spd = matrix(3,1),
+		rot = matrix(3,1),
 	},
+	desired = { -- Can be either pos/rot or spd, according to mode
+		position = matrix(3,1),
+		rotation = matrix(3,1),
+	}
 }
 
-module.sensors = {
-	acc = {},
-	gyro = {},
-	mag = {},
-}
 
--- Modes: 0 (full control), 1 (auto hover), ... (more to come)
-module.mode = 0
 module.calibrating = false -- false, "sensors", "motors"
 
 
@@ -79,7 +79,8 @@ module.calibrating = false -- false, "sensors", "motors"
 
 -- CONTROL FUNCTIONS
 
-function module.translateControls() -- Apply the masks
+-- Apply the masks to the motor values
+function module.translateControls(controls)
 	for k, v in pairs(module.defaults) do -- Defaults
 		module.motors = module.defaults[k] + 1
 	end
@@ -92,6 +93,33 @@ function module.translateControls() -- Apply the masks
 			module.motors = module.motors * (module.masks[k] * scale + 1)
 		end
 	end
+end
+
+function module.calculateMotors(mode, controls)
+	if mode == 0 then
+		module.translateControls(controls)
+	elseif mode == 1 then
+		-- Calculate controls based off desired speed
+	elseif mode == 2 then
+		-- Calculate controls based off desired position and default max speed
+	end
+end
+
+function calculateControls(controls)
+	local desired = matrix(3,1) -- Create new position vector
+	
+	-- Calculate desired position vector
+	
+	-- Calculate controls (difference between desired and actual position)
+	local c = desired - orientation.position.pos
+	
+	-- Convert controls to power, yaw, pitch, roll (don't use yaw)
+	controls.power = c[3][1] -- z
+	controls.yaw = 0
+	controls.pitch = c[1][1] -- x
+	controls.roll = c[2][1] -- y
+	
+	return controls
 end
 
 
@@ -132,19 +160,20 @@ function module.orientate(sensorData)
 	local pos = module.orientation.position
 	local rot = module.orientation.rotation
 	local interval = module.sensorInterval / 1000
+	local sensors = { acc = {}, gyro = {} }
 
 	if sensorData then
 		-- Set sensor data
-		module.sensors.acc.acc = matrix{ sensorData.acc.x, sensorData.acc.y, sensorData.acc.z }
-		module.sensors.gyro.acc = matrix{ sensorData.gyro.x, sensorData.gyro.y, sensorData.gyro.z }
+		sensors.acc.acc = matrix{ sensorData.acc.x, sensorData.acc.y, sensorData.acc.z }
+		sensors.gyro.acc = matrix{ sensorData.gyro.x, sensorData.gyro.y, sensorData.gyro.z }
 	end
 
 	-- Convert linear and angular acceleration to speed and position (relative to the drone, not the earth)
-	pos.acc = module.sensors.acc
+	pos.acc = sensors.acc
 	pos.spd = pos.spd + pos.acc * interval
 	pos.pos = pos.pos + pos.spd * interval
 
-	rot.acc = module.sensors.gyro
+	rot.acc = sensors.gyro
 	rot.spd = rot.spd + rot.acc * interval
 	rot.pos = rot.pos + rot.spd * interval
 

@@ -126,6 +126,12 @@ function serializeMotorValues(values)
 	})
 end
 
+function setMode(newMode)
+	mode = newMode % 3 -- Set mode
+	GUIs[0]:find("mode"):find("title").text = "MODE ("..mode..")" -- Set mode button title
+	fly.orientation.desired = { position = {}, rotation = {} } -- Reset desired orientation
+end
+
 function unserialize(data)
 	local fn = loadstring("return " .. data)
 	if fn then
@@ -169,6 +175,7 @@ function love.load()
 	
 	messages = {}
 	
+	-- Modes: 0 (full control), 1 (speed control), 3 (position control)
 	mode = 0
 	udpConnected = false
 	active = false
@@ -199,7 +206,7 @@ function love.update(dt)
 			
 			if t > 1/sendInterval then
 				t = t - (1/sendInterval)
-				fly.translateControls()
+				fly.calculateMotors( mode, controls )
 				net.send( serializeMotorValues(fly.motors) )
 			end
 		end
