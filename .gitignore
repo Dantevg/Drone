@@ -1,8 +1,6 @@
 nodemcu/.nodemcutool
 nodemcu/main_old.lua
 
-esp32
-
 *.exe
 *.ttf
 *.ini
