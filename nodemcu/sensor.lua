@@ -231,7 +231,7 @@ function module.read(sensor)
 	sensorData.y = sensorData.y - calibration[sensor].y
 	sensorData.z = sensorData.z - calibration[sensor].z
 	
-	return convert(sensor, sensorData)
+	return sensor
 end
 
 -- Sets the acc's control registers
