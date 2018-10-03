@@ -190,4 +190,6 @@ end
 
 -- RETURN
 
+matrix.multiply = matrix.hadamard
+
 return module
