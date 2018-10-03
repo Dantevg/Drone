@@ -194,7 +194,7 @@ function matrix.tostring(m)
 	
 	for row = 1, #m do
 		for col = 1, #m[row] do
-			str = str .. m[row][col] .. "\t"
+			str = str .. math.floor( m[row][col] * 1000 ) / 1000 .. "\t"
 		end
 		str = str .. "\n"
 	end
