@@ -70,7 +70,7 @@ function matrix.loop( m1, m2, fn )
 		end
 	end
 	
-	return setmetatable( m, mt )
+	return matrix.new(m)
 end
 
 -- Fill the given matrix with n or using a function(row,col)
@@ -111,7 +111,7 @@ function matrix.mul( m1, m2 )
 	if type(m2) == "number" then
 		return matrix.scale( m1, m2 )
 	else
-		return matrix.product( m1, m2 )
+		return m1.multiply and m1.multiply( m1, m2 ) or matrix.multiply( m1, m2 )
 	end
 end
 
@@ -151,7 +151,13 @@ function matrix.product( a, b )
 		end
 	end
 	
-	return setmetatable( m, mt )
+	return matrix.new(m)
+end
+
+function matrix.hadamard( m1, m2 )
+	return matrix.loop( m1, m2, function( a, b )
+		return a * b
+	end)
 end
 
 function matrix.transpose(m)
@@ -164,7 +170,7 @@ function matrix.transpose(m)
 		end
 	end
 	
-	return setmetatable( new, mt )
+	return matrix.new(new)
 end
 
 function matrix.equals( m1, m2 )
@@ -217,6 +223,14 @@ end
 mt.__eq = matrix.equals
 
 mt.__tostring = matrix.tostring
+
+
+
+
+
+-- SETTINGS
+
+matrix.multiply = matrix.product -- matrix.product or matrix.hadamard
 
 
 
