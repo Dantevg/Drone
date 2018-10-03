@@ -8,6 +8,7 @@
 -- CONSTANTS
 
 local socket = require "socket" -- Luasocket
+local sensor = require "sensor"
 
 local MAC = "24:0A:C4:9B:3B:0C"
 
@@ -15,6 +16,14 @@ local motorPins = {
 	{pin = pio.GPIO5}, {pin = pio.GPIO18},
 	{pin = pio.GPIO19}, {pin = pio.GPIO21},
 }
+
+
+
+
+
+-- VARIABLES
+
+local ip, port = nil, nil
 
 
 
@@ -39,6 +48,18 @@ function stringify(t)
 	return s .. "}"
 end
 
+function getSensors()
+	if ip and port then -- Connected
+		udp:sendto( stringify{
+			type = "sensors",
+			data = {
+				acc = sensor.read("acc"),
+				gyro = sensor.read("gyro")
+			}
+		}, ip, port )
+	end
+end
+
 
 
 
@@ -53,10 +74,10 @@ function responses.start()
 		motorPins[i].pwm:start()
 	end
 	
-	return stringify({
+	return stringify{
 		type = "start",
 		message = "true"
-	})
+	}
 end
 
 function responses.stop()
@@ -65,36 +86,17 @@ function responses.stop()
 		motorPins[i].pwm:stop()
 	end
 	
-	return stringify({
+	return stringify{
 		type = "stop",
 		message = "true"
-	})
+	}
 end
 
--- Controller sends motor values, respond with sensor values
-function responses.fly(data)
+-- Controller sends motor values
+function responses.setMotors(data)
 	-- Set motors
 	for i = 1, #motorPins do
 		motorPins[i].pwm:setduty(data.motors[i])
-	end
-	
-	-- Read sensors
-	
-	-- Return
-end
-
-function receive(socket, data, port, ip)
-	log( "UDP Receive from " .. ip .. " at port " .. port .. ":", data )
-	data = loadstring("return " .. data)()
-	log( data.option )
-	
-	if responses[data.option] then
-		local success, response = pcall( responses[data.option], data, socket, port, ip )
-		if response then
-			socket:send( port, ip, response )
-		end
-	else
-		socket:send( port, ip, stringify({ err = "No such function" }) )
 	end
 end
 
@@ -109,7 +111,7 @@ function main()
 	if not data then return end -- Nothing received, stop
 	
 	-- Get controller ip and port to respond to
-	local ip, port = udp:getpeername()
+	ip, port = udp:getpeername()
 	
 	-- Get data
 	log( "RECEIVE\tip: "..ip.."\tport: "..port.."\tdata: "..data )
@@ -121,7 +123,7 @@ function main()
 	if responses[data.option] then
 		_, response = pcall( responses[data.option], data, ip, port )
 	else
-		response = stringify({ err = "No such function" })
+		response = stringify{ err = "No such function" }
 	end
 	
 	-- Return
@@ -155,5 +157,5 @@ for i = 1, #motorPins do
 end
 
 -- Start main loop
-local loop = tmr.attach( tmr.TMR0, 10000, main )
+local loop = tmr.attach( tmr.TMR0, 10000, main ) -- Every 10 ms
 loop:start()
