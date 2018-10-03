@@ -25,6 +25,8 @@ local motorPins = {
 
 local ip, port = nil, nil
 
+local sensors = {}
+
 
 
 
@@ -48,16 +50,11 @@ function stringify(t)
 	return s .. "}"
 end
 
-function getSensors()
-	if ip and port then -- Connected
-		udp:sendto( stringify{
-			type = "sensors",
-			data = {
-				acc = sensor.read("acc"),
-				gyro = sensor.read("gyro")
-			}
-		}, ip, port )
-	end
+function updateSensors()
+	sensors = {
+		acc = sensor.read("acc"),
+		gyro = sensor.read("gyro")
+	}
 end
 
 
@@ -100,6 +97,19 @@ function responses.setMotors(data)
 	end
 end
 
+function responses.getSensors()
+	return stringify{
+		type = "sensors",
+		data = sensors
+	}
+end
+
+-- Set motors and respond with sensor data
+function responses.fly(data)
+	responses.setMotors(data)
+	return responses.getSensors()
+end
+
 
 
 
@@ -121,6 +131,7 @@ function main()
 	local response = {}
 	
 	if responses[data.option] then
+		log( "EXECUTE\t"..data.option )
 		_, response = pcall( responses[data.option], data, ip, port )
 	else
 		response = stringify{ err = "No such function" }
