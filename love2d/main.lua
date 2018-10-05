@@ -40,12 +40,12 @@ function love.load()
 	
 	controls = {
 		pos = {
-			z = {}
+			z = 0
 		},
 		rot = {
-			x = {},
-			y = {},
-			z = {},
+			x = 0,
+			y = 0,
+			z = 0,
 		}
 	}
 	
@@ -60,7 +60,7 @@ function love.load()
 	
 	messages = {}
 	
-	-- Modes: 0 (full control), 1 (speed control), 3 (position control)
+	-- Modes: 0 (full control), 1 (rotation control), 2 (speed control), 3 (position control)
 	mode = 0
 	udpConnected = false
 	active = false
@@ -85,8 +85,8 @@ function love.update(dt)
 	end
 	
 	t = t + dt
-	if t > 0.5 then
-		t = t - 0.5
+	if t > 0.1 then
+		t = t - 0.1
 		fly.calculateMotors( mode, controls )
 		-- networkControls = serializeMotorValues(fly.motors)
 	end
