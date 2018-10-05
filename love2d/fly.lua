@@ -20,19 +20,15 @@ module.sensorInterval = 1000 -- Delay between sensor readings (in ms)
 -- FRONT LEFT (cw),	FRONT RIGHT (ccw),
 -- BACK LEFT (ccw),	BACK RIGHT (cw)
 module.masks = {
-	power = matrix{ -- Default
-		{1, 1},
-		{1, 1},
-	},
-	yaw = matrix{ -- Turn right
+	z = matrix{ -- Turn right
 		{-1, 1},
 		{ 1,-1},
 	},
-	pitch = matrix{ -- Forward
+	y = matrix{ -- Forward
 		{-1, -1},
 		{ 1,  1},
 	},
-	roll = matrix{ -- Right
+	x = matrix{ -- Right
 		{1, -1},
 		{1, -1},
 	},
@@ -84,42 +80,114 @@ function module.translateControls(controls)
 	for k, v in pairs(module.defaults) do -- Defaults
 		module.motors = module.defaults[k] + 1
 	end
-
-	for k, v in pairs(module.masks) do -- Controls
-		if k == "power" then
-			module.motors = module.motors * (module.masks[k] * controls[k])
-		else
-			local scale = 0.2 * controls[k] * math.abs(controls[k])
-			module.motors = module.motors * (module.masks[k] * scale + 1)
-		end
+	
+	module.motors = module.motors * controls.pos.z
+	
+	for _, v in ipairs{"z","y","x"} do
+		local scale = 0.2 * controls.rot[v] * math.abs(controls.rot[v])
+		module.motors = module.motors * (module.masks[v] * scale + 1)
 	end
+	
+	networkControls = module.motors
 end
 
 function module.calculateMotors(mode, controls)
 	if mode == 0 then
 		module.translateControls(controls)
 	elseif mode == 1 then
-		-- Calculate controls based off desired speed
+		-- Calculate controls based off desired angle
+		module.translateControls( calculateAngleControls(controls) )
 	elseif mode == 2 then
+		-- Calculate controls based off desired speed
+		module.translateControls( calculateSpeedControls(controls) )
+	elseif mode == 3 then
 		-- Calculate controls based off desired position and default max speed
+		module.translateControls( calculatePositionControls(controls) )
 	end
 end
 
-function calculateControls(controls)
-	local desired = matrix(3,1) -- Create new position vector
+function calculateAngleControls(controls)
+	local current = module.orientation.rotation.pos
+	local desired = matrix{ {controls.rot.x}, {controls.rot.y}, {controls.pos.z} }
 	
-	-- Calculate desired position vector
+	local c = {
+		pos = {
+			z = 0
+		},
+		rot = {
+			x = 0,
+			y = 0,
+			z = 0,
+		}
+	}
 	
-	-- Calculate controls (difference between desired and actual position)
-	local c = desired - orientation.position.pos
+	if current.x < desired[1] then
+		c.rot.x = 0.1
+	end
+	if current.y < desired[2] then
+		c.rot.y = 0.1
+	end
+	if current.z < desired[3] then
+		c.pos.z = 0.1
+	end
 	
-	-- Convert controls to power, yaw, pitch, roll (don't use yaw)
-	controls.power = c[3][1] -- z
-	controls.yaw = 0
-	controls.pitch = c[1][1] -- x
-	controls.roll = c[2][1] -- y
+	return c
+end
+
+function calculateSpeedControls(controls)
+	local current = module.orientation.position.spd
+	local desired = matrix{ {controls.rot.x}, {controls.rot.y}, {controls.pos.z} }
 	
-	return controls
+	local c = {
+		pos = {
+			z = 0
+		},
+		rot = {
+			x = 0,
+			y = 0,
+			z = 0,
+		}
+	}
+	
+	if current.x < desired[1] then
+		c.rot.x = 0.1
+	end
+	if current.y < desired[2] then
+		c.rot.y = 0.1
+	end
+	if current.z < desired[3] then
+		c.pos.z = 0.1
+	end
+	
+	return c
+end
+
+function calculatePositionControls(controls)
+	local current = module.orientation.position.pos
+	local desired = matrix{ {controls.rot.x}, {controls.rot.y}, {controls.pos.z} }
+	
+	local c = {
+		pos = {
+			z = 0
+		},
+		rot = {
+			x = 0,
+			y = 0,
+			z = 0,
+		}
+	}
+	
+	if current.x < desired[1] then
+		c.rot.x = 0.1
+	end
+	if current.y < desired[2] then
+		c.rot.y = 0.1
+	end
+	if current.z < desired[3] then
+		c.pos.z = 0.1
+	end
+	
+	return c
 end
 
 
@@ -182,6 +250,9 @@ function module.orientate(sensorData)
 	pos.pos = module.rotate( "x", rot.pos.x ) * pos.pos
 	pos.pos = module.rotate( "y", rot.pos.y ) * pos.pos
 	pos.pos = module.rotate( "z", rot.pos.z ) * pos.pos
+	
+	module.orientation.position = pos
+	module.orientation.rotation = rot
 end
 
 
