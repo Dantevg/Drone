@@ -117,7 +117,7 @@ end
 -- PROGRAM FUNCTIONS
 
 function main()
-	local data = udp:receivce() -- Receive
+	local data = udp:receive() -- Receive
 	if not data then return end -- Nothing received, stop
 	
 	-- Get controller ip and port to respond to
@@ -150,23 +150,27 @@ end
 
 -- START
 
-log("STARTED")
+log("STARTING DRONE SOFTWARE")
 
 -- Create wifi network
+log("CREATING WIFI NETWORK")
 net.wf.setup( net.wf.mode.AP, "esp32-drone", "whitecat" )
 net.wf.start()
 
 -- Setup UDP
+log("STARTING UDP SOCKET")
 udp = socket.udp()
 udp:setsockname( "*", "5000" )
 udp:settimeout(0)
 
 -- Setup PWM
+log("INITIALIZING PWM")
 for i = 1, #motorPins do
 	-- pwm.attach( pin, freq (Hz), duty [0-1] )
-	motorPins[i].pwm = pwm.attach( motorPins[1].pin, 1000, 0 )
+	motorPins[i].pwm = pwm.attach( motorPins[i].pin, 1000, 0 )
 end
 
 -- Start main loop
 local loop = tmr.attach( tmr.TMR0, 10000, main ) -- Every 10 ms
 loop:start()
+log("STARTED")
