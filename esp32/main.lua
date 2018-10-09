@@ -117,19 +117,21 @@ end
 -- PROGRAM FUNCTIONS
 
 function receive(data)
-	-- Get controller ip and port to respond to
-	ip, port = udp:getpeername()
-	
 	-- Get data
-	log( "RECEIVE\tip: "..ip.."\tport: "..port.."\tdata: "..data )
-	data = loadstring("return " .. data)()
+	local fn, err = load("return " .. data)
+	if err then error(err) end
+	data = fn()
+	
+	ip, port = data.ip, data.port
+	
+	log( "RECEIVE\tip: "..data.ip.."\tport: "..data.port.."\tdata: "..data.data )
 	
 	-- Get response
 	local response = {}
 	
-	if responses[data.option] then
-		log( "EXECUTE\t"..data.option )
-		_, response = pcall( responses[data.option], data, ip, port )
+	if responses[data.fn] then
+		log( "EXECUTE\t"..data.fn )
+		_, response = pcall( responses[data.fn], data, ip, port )
 	else
 		response = stringify{ err = "No such function" }
 	end
@@ -150,9 +152,17 @@ end
 log("STARTING DRONE SOFTWARE")
 
 -- Create wifi network
-log("CREATING WIFI NETWORK")
-net.wf.setup( net.wf.mode.AP, "esp32-drone", "whitecat" )
+-- log("CREATING WIFI NETWORK")
+-- net.wf.setup( net.wf.mode.AP, "esp32-drone", "whitecat" )
+log("CONNECTING TO WIFI NETWORK")
+net.wf.setup( net.wf.mode.STA, "VFNL-48A35C", "TD1XQETY" )
 net.wf.start()
+
+while not net.connected() do
+	tmr.sleepms(100)
+end
+
+log("CONNECTED")
 
 -- Setup UDP
 log("STARTING UDP SOCKET")
