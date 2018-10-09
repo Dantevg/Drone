@@ -116,10 +116,7 @@ end
 
 -- PROGRAM FUNCTIONS
 
-function main()
-	local data = udp:receive() -- Receive
-	if not data then return end -- Nothing received, stop
-	
+function receive(data)
 	-- Get controller ip and port to respond to
 	ip, port = udp:getpeername()
 	
@@ -171,6 +168,10 @@ for i = 1, #motorPins do
 end
 
 -- Start main loop
-local loop = tmr.attach( tmr.TMR0, 10000, main ) -- Every 10 ms
-loop:start()
 log("STARTED")
+
+while true do
+	local data = udp:receive()
+	if data then receive(data) end
+	tmr.sleepms(1000) -- Sleep for 1 second (difference with tmr.delayms?)
+end
