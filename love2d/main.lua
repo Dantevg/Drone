@@ -1,6 +1,7 @@
 -- CONSTANTS
 
 require "utils"
+matrix = require "matrix"
 local socket = require "socket"
 local net = require "net"
 local fly = require "fly"
@@ -62,10 +63,10 @@ function love.load()
 	
 	-- Modes: 0 (full control), 1 (rotation control), 2 (speed control), 3 (position control)
 	mode = 0
-	udpConnected = false
 	active = false
 	
 	require "ui" -- Build the UI
+	matrix.multiply = matrix.hadamard
 end
 
 function love.update(dt)
@@ -84,35 +85,27 @@ function love.update(dt)
 		end
 	end
 	
-	t = t + dt
-	if t > 0.1 then
-		t = t - 0.1
-		fly.calculateMotors( mode, controls )
-		-- networkControls = serializeMotorValues(fly.motors)
-	end
-
+	fly.calculateMotors( mode, controls )
+	
 	-- UDP Send controls to NodeMCU
-	if udpConnected then
-		if active then
-			t = t + dt
-			
-			if t > 1/sendInterval then
-				t = t - (1/sendInterval)
-				fly.calculateMotors( mode, controls )
-				net.send( controller.serializeMotors(fly.motors) )
-			end
-		end
+	if active then
+		t = t + dt
 		
-		-- UDP Receive sensor values from NodeMCU
-		net.receive(function(data)
-			log( data )
-			data = unserialize(data)
-			if data.type == "start" and data.message == "true" then
-				active = true
-			end
-			fly.orientate(data)
-		end)
+		if t > 1/sendInterval then
+			t = t - (1/sendInterval)
+			net.send( controller.serializeMotors(fly.motors) )
+		end
 	end
+	
+	-- UDP Receive values from NodeMCU
+	net.receive(function(response)
+		log(response)
+		response = unserialize(response)
+		if response.type == "start" and response.data == "true" then
+			active = true
+		end
+		-- attitude.orientate(response)
+	end)
 end
 
 function love.draw()
