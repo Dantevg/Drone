@@ -59,7 +59,7 @@ end
 function controller.serializeMotors(values)
 	if not values then return "nil" end
 	
-	return stringify({
+	return {
 		option = "fly",
 		motors = {
 			constrain( round(values[1][1], 2), 0, 1 ),
@@ -67,7 +67,7 @@ function controller.serializeMotors(values)
 			constrain( round(values[2][1], 2), 0, 1 ),
 			constrain( round(values[2][2], 2), 0, 1 ),
 		}
-	})
+	}
 end
 
 
