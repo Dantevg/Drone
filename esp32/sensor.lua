@@ -117,29 +117,21 @@ function module.read(sensor)
 	-- Read 6 bytes from registers starting at x[1]
 	-- x, y, z values, 2 bytes per value
 	if sensor == "acc" then
-		for i = 1, 6 do
-			rawData[i] = i2cRead( addrAccGyro, regAccGyro.accX[1] + (i-1) )
-			rawData[i] = string.byte( rawData[i] )
-		end
+		rawData = i2cRead( addrAccGyro, regAccGyro.accX[1], 6 )
 	elseif sensor == "gyro" then
-		for i = 1, 6 do
-			rawData[i] = i2cRead( addrAccGyro, regAccGyro.gyroX[1] + (i-1) )
-			rawData[i] = string.byte( rawData[i] )
-		end
+		rawData = i2cRead( addrAccGyro, regAccGyro.gyroX[1], 6 )
 	end
 	
 	-- Combine the least and most significant bit
-	sensorData.x = bit.bor( bit.lshift( rawData[1], 8 ), rawData[2] )
-	sensorData.y = bit.bor( bit.lshift( rawData[3], 8 ), rawData[4] )
-	sensorData.z = bit.bor( bit.lshift( rawData[5], 8 ), rawData[6] )
+	sensorData.x = rawData[1] | (rawData[2] << 8)
+	sensorData.y = rawData[3] | (rawData[4] << 8)
+	sensorData.z = rawData[5] | (rawData[6] << 8)
 	
-	-- Divide by 2^15-1 (32767) as the sensor stores the data mapped between
-	-- the min and max values of a 16-bit signed word
-	-- Then multiply by sensitivity
+	-- Multiply by sensitivity
 	local sensitivity = sensitivities[sensor][module.settings[sensor].scale]
-	sensorData.x = sensorData.x / 32767 * sensitivity
-	sensorData.y = sensorData.y / 32767 * sensitivity
-	sensorData.z = sensorData.z / 32767 * sensitivity
+	sensorData.x = sensorData.x * sensitivity
+	sensorData.y = sensorData.y * sensitivity
+	sensorData.z = sensorData.z * sensitivity
 	
 	return sensorData
 end
@@ -148,10 +140,13 @@ end
 function initAcc()
 	local ctrl6 = 0x00
 	-- [ODR 2][ODR 1][ODR 0][SCL 1][SCL 0][BWMOD][BW  1][BW  0]
+	-- ODR: Output data rate
+	-- SCL: Scale (FS)
 	-- BWMOD: Bandwidth auto or manual
+	-- BW: Bandwidth
 	
-	ctrl6 = bit.lshift( module.settings.acc.sampleRate, 5 ) -- ODR
-	ctrl6 = bit.bor( ctrl6, bit.lshift(scales.acc[module.settings.acc.scale], 3) ) -- SCL
+	ctrl6 = module.settings.acc.sampleRate << 5 -- ODR
+	ctrl6 = ctrl6 | (scales.acc[module.settings.acc.scale] << 3)-- SCL
 	i2cWrite( addrAccGyro, regAccGyro.ctrl6, ctrl6 ) -- Send
 end
 
@@ -163,23 +158,32 @@ function initGyro()
 	-- SCL: Scale (FS)
 	-- BW: Bandwidth
 	
-	ctrl1 = bit.lshift( module.settings.gyro.sampleRate, 5 ) -- ODR
-	ctrl1 = bit.bor( ctrl1, bit.lshift(scales.gyro[module.settings.gyro.scale], 3) ) -- SCL
-	ctrl1 = bit.bor( ctrl1, module.settings.gyro.bandwidth ) -- BW
+	ctrl1 = module.settings.gyro.sampleRate << 5 -- ODR
+	ctrl1 = ctrl1 | (scales.gyro[module.settings.gyro.scale] << 3) -- SCL
+	ctrl1 = ctrl1 | module.settings.gyro.bandwidth -- BW
 	i2cWrite( addrAccGyro, regAccGyro.ctrl1, ctrl1 ) -- Send
 end
 
-function i2cRead( address, register )
+function i2cRead( address, register, length )
 	-- Send request
 	comm:start()
 	comm:address( address, false )
-	comm:write( 0x00, register )
-	-- comm:write( bit.bor(register, (length and 0x80 or 0)) )
+	comm:write( register )
+	-- comm:write( register | (length and 0x80 or 0) )
 	
 	-- Receive data
+	local data = {}
+	
 	comm:start()
 	comm:address( address, true )
-	local data = comm:read()
+	
+	if length then
+		for i = 1, length do
+			data[i] = comm:read()
+		end
+	else
+		data = comm:read()
+	end
 	comm:stop()
 	
 	return data
@@ -188,13 +192,14 @@ end
 function i2cWrite( address, register, data )
 	comm:start()
 	comm:address( address, false )
-	comm:write( 0x00, register, data )
+	comm:write( register, data )
 	comm:stop()
 	
 	local done = false
 	
 	-- Poll the sensor and wait for the sensor to respond
 	-- The sensor will only respond then the write has finished
+	-- From whitecat i2c example
 	while not done do
 		try(function()
 			comm:start()
@@ -211,7 +216,7 @@ end
 
 -- START
 
-local comm = i2c.attach( module.settings.i2cSDA, i2c.MASTER, 10000 ) -- Setup i2c with 10kHz
+local comm = i2c.attach( module.settings.i2cSDA, i2c.MASTER ) -- Setup i2c
 
 initAcc()
 initGyro()
