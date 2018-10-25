@@ -1,6 +1,8 @@
 nodemcu/.nodemcutool
 nodemcu/main_old.lua
 
+.vscode
+
 *.exe
 *.ttf
 *.ini
