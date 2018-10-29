@@ -91,7 +91,7 @@ end
 
 -- LOAD MODULES
 
-local modules = require "guiModules"
+local modules = require "ui/guiModules"
 
 for k, v in pairs(modules) do
 	GUI.modules[k] = setmetatable( modules[k], {__index = GUI} )

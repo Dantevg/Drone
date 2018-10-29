@@ -1,7 +1,7 @@
 -- CONSTANTS
 
-local attitude = require "attitude"
-local autopilot = require "autopilot"
+local attitude = require "calc/attitude"
+local autopilot = require "calc/autopilot"
 
 local fly = {}
 

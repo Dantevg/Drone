@@ -4,8 +4,8 @@ require "utils"
 matrix = require "matrix"
 local socket = require "socket"
 local net = require "net"
-local fly = require "fly"
-local controller = require "controller"
+local fly = require "calc/fly"
+local controller = require "ui/controller"
 
 local sendInterval = 10
 local activateMouse = true
@@ -65,7 +65,7 @@ function love.load()
 	mode = 0
 	active = false
 	
-	require "ui" -- Build the UI
+	require "ui/ui" -- Build the UI
 	matrix.multiply = matrix.hadamard
 end
 

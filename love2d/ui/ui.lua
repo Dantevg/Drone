@@ -1,5 +1,5 @@
 local net = require "net"
-GUI = require "gui"
+GUI = require "ui/gui"
 
 GUIs = {}
 
