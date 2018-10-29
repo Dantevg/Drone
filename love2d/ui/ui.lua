@@ -1,3 +1,12 @@
+--[[
+	
+	UI
+	by RedPolygon
+	
+	This file adds the needed elements and their behaviors to the UI
+	
+--]]
+
 local net = require "net"
 GUI = require "ui/gui"
 

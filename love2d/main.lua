@@ -1,3 +1,14 @@
+--[[
+	
+	MAIN DRONE CONTROLLER FILE
+	by RedPolygon
+	
+	This main file gets called by Love2d
+	It loads all modules, passes all needed events to the correct recipient,
+	coordinates the drawing and provides the backbone of the controller program
+	
+--]]
+
 -- CONSTANTS
 
 require "utils"

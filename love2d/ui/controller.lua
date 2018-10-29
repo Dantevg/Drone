@@ -1,3 +1,12 @@
+--[[
+	
+	COMTROLLER MODULE
+	by RedPolygon
+	
+	These functions calculate the controller values out of touch positions
+	
+--]]
+
 -- VARIABLES
 
 local controller = {}

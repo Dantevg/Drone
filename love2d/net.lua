@@ -1,3 +1,12 @@
+--[[
+	
+	NET MODULE
+	by RedPolygon
+	
+	Provides UDP communication
+	
+--]]
+
 local module = {}
 
 local ip = "192.168.1.103"

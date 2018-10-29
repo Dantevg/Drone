@@ -1,3 +1,12 @@
+--[[
+	
+	ATTUTIDE MODULE
+	by RedPolygon
+	
+	This file contains all functions nessessary to orientate the drone
+	
+--]]
+
 -- CONSTANTS
 
 local attitude = {}

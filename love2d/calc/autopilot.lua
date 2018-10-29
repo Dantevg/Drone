@@ -1,3 +1,12 @@
+--[[
+	
+	AUTOPILOT MODULE
+	by RedPolygon
+	
+	This file contains all functions for automatic controls
+	
+--]]
+
 -- CONSTANTS
 
 local autopilot = {}

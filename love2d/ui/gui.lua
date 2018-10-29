@@ -1,5 +1,9 @@
--- GUI framework
--- by RedPolygon
+--[[
+	
+	GUI FRAMEWORK
+	by RedPolygon
+	
+--]]
 
 -- VARIABLES
 

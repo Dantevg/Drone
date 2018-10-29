@@ -1,4 +1,11 @@
--- GUI MODULES
+--[[
+	
+	GUI MODULES
+	by RedPolygon
+	
+	This file contains some GUI-modules for use with my GUI framework
+	
+--]]
 
 local modules = {}
 

@@ -1,3 +1,13 @@
+--[[
+	
+	FLY
+	by RedPolygon
+	
+	The functions in this file combine the orientation and auto flying functions
+	to calculate the controls based off the mode the user is in
+	
+--]]
+
 -- CONSTANTS
 
 local attitude = require "calc/attitude"
