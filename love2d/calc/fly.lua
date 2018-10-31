@@ -29,17 +29,17 @@ fly.motorPins = {
 -- FRONT LEFT (cw),	FRONT RIGHT (ccw),
 -- BACK LEFT (ccw),	BACK RIGHT (cw)
 fly.masks = {
-	z = matrix{ -- Turn right
-		{-1, 1},
-		{ 1,-1},
-	},
-	y = matrix{ -- Forward
+	matrix{ -- x/forward
 		{-1, -1},
 		{ 1,  1},
 	},
-	x = matrix{ -- Right
+	matrix{ -- y/right
 		{1, -1},
 		{1, -1},
+	},
+	matrix{ -- z/yaw/turn right
+		{-1, 1},
+		{ 1,-1},
 	},
 }
 
@@ -65,34 +65,54 @@ fly.calibrating = false -- false, "sensors", "motors"
 
 -- FUNCTIONS
 
+function fly.reset()
+	-- Reset desired orientation
+	attitude.orientation.desired = { position = {}, rotation = {} }
+	
+	-- TODO: Reset PID
+end
+
 -- Apply the masks to the motor values
 function fly.translateControls(controls)
-	for k, v in pairs(fly.defaults) do -- Defaults
+	-- Defaults
+	for k, v in pairs(fly.defaults) do
 		fly.motors = fly.defaults[k] + 1
 	end
 	
-	fly.motors = fly.motors * controls.pos.z
+	local power = (controls[3][1] + 1) / 2
+	local pitch = controls[1][1]
+	local roll = controls[2][1]
+	local yaw = controls[4][1]
 	
-	for _, v in ipairs{"z","y","x"} do
-		local scale = 0.2 * controls.rot[v] * math.abs(controls.rot[v])
-		fly.motors = fly.motors * (fly.masks[v] * scale + 1)
-	end
+	-- Controls: z/up, x/pitch, y/roll, z/yaw
+	fly.motors[1][1] = power - pitch + roll - yaw
+	fly.motors[1][2] = power - pitch - roll + yaw
+	fly.motors[2][1] = power + pitch + roll + yaw
+	fly.motors[2][2] = power + pitch - roll - yaw
+	
+	-- fly.motors = fly.motors * controls[4][1]
+	
+	-- for i = 1, #fly.masks do
+	-- 	local mask = fly.masks[i]
+	-- 	local scale = 0.2 * controls[i][1] * math.abs(controls[i][1])
+	-- 	fly.motors = fly.motors * (mask * scale + 1)
+	-- end
 	
 	networkControls = fly.motors -- Debugging
 end
 
-function fly.calculateMotors(mode, controls)
+function fly.calculateMotors( mode, controls, dt )
 	if mode == 0 then
 		fly.translateControls(controls)
 	elseif mode == 1 then
-		-- Calculate controls based off desired angle
-		fly.translateControls( autopilot.angle(controls) )
+		-- Calculate controls based off desired rotation
+		fly.translateControls( autopilot.rotation( controls, attitude.orientation, dt ) )
 	elseif mode == 2 then
 		-- Calculate controls based off desired speed
-		fly.translateControls( autopilot.speed(controls) )
+		fly.translateControls( autopilot.speed( controls, attitude.orientation, dt ) )
 	elseif mode == 3 then
-		-- Calculate controls based off desired position and default max speed
-		fly.translateControls( autopilot.position(controls) )
+		-- Calculate controls based off desired position
+		fly.translateControls( autopilot.position( controls, attitude.orientation, dt ) )
 	end
 end
 

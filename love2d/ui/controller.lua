@@ -3,7 +3,13 @@
 	COMTROLLER MODULE
 	by RedPolygon
 	
-	These functions calculate the controller values out of touch positions
+	These functions calculate the controller values out of touch/mouse positions
+	
+	Controller values (position/rotation) (4x1 matrix): (-1 to 1)
+		x (forward/pitch)
+		y (right/roll)
+		z (up)
+		z (yaw)
 	
 --]]
 
@@ -18,50 +24,43 @@ local controller = {}
 -- FUNCTIONS
 
 function controller.round(values)
-	values.pos.z = values.pos.z and constrain( round(values.pos.z, 2),  0, 1 ) or 0
-	values.rot.z = values.rot.z and constrain( round(values.rot.z, 2), -1, 1 ) or 0
-	values.rot.y = values.rot.y and constrain( round(values.rot.y, 2), -1, 1 ) or 0
-	values.rot.x = values.rot.x and constrain( round(values.rot.x, 2), -1, 1 ) or 0
-	return values
+	return values:loop(function(v)
+		return constrain( round(v, 2), -1, 1 )
+	end)
 end
 
 function controller.getFromTouch(touches)
-	local values = {}
+	local controls = matrix(4,1)
 
 	for i, id in ipairs(touches) do
 		local x, y = love.touch.getPosition(id)
 		if x < width/2 then -- Left pad
-			values.pos.z = map( y, 0, height*0.8, 1, 0 )
-			values.rot.z = map( x, 0, width/2, 0, 1 )
+			controls[3][1] = map( y, 0, height*0.8, 1, -1 ) -- z/up
+			controls[4][1] = map( x, 0, width/2, -1, 1 ) -- z/yaw
 		else -- Right pad
-			values.rot.y = map( y, 0, height*0.8, 1, 0 )
-			values.rot.x = map( x, width/2, width, 0, 1 )
+			controls[1][1] = map( y, 0, height*0.8, 1, -1 ) -- x/roll/forward
+			controls[2][1] = map( x, width/2, width, -1, 1 ) -- y/pitch/right
 		end
 	end
 
-	return controller.round(values)
+	return controller.round(controls)
 end
 
 function controller.getFromMouse()
-	if mouse.y > height*0.8 then
-		controls.pos.z = 0.5 -- Up
-		controls.rot.z = 0   -- Yaw
-		controls.rot.y = 0   -- Pitch
-		controls.rot.x = 0   -- Roll
-		return controls
+	local controls = matrix(4,1)
+	
+	-- Calculate controls
+	if mouse.y > height*0.8 then -- Outside controller area
+		return controls -- Leave the matrix empty
 	end
 	if mouse.x < width/2 then -- Left pad
-		controls.pos.z = map( mouse.y, 0, height*0.8, 1, 0 )
-		controls.rot.z = map( mouse.x, 0, width/2, -1, 1 )
-		controls.rot.y = 0
-		controls.rot.x = 0
+		controls[3][1] = map( mouse.y, 0, height*0.8, 1, -1 ) -- z/up
+		controls[4][1] = map( mouse.x, 0, width/2, -1, 1 ) -- z/yaw
 	else -- Right pad
-		controls.pos.z = 0.5
-		controls.rot.z = 0
-		controls.rot.y = map( mouse.y, 0, height*0.8, 1, -1 )
-		controls.rot.x = map( mouse.x, width/2, width, -1, 1 )
+		controls[1][1] = map( mouse.y, 0, height*0.8, 1, -1 ) -- x/roll/forward
+		controls[2][1] = map( mouse.x, width/2, width, -1, 1 ) -- y/pitch/right
 	end
-
+	
 	return controller.round(controls)
 end
 
