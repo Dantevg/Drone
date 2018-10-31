@@ -32,9 +32,9 @@ function log(msg)
 end
 
 function setMode(newMode)
-	mode = newMode % 3 -- Set mode
+	mode = newMode % 4 -- Set mode
 	GUIs[0]:find("mode"):find("title").text = "MODE ("..mode..")" -- Set mode button title
-	fly.orientation.desired = { position = {}, rotation = {} } -- Reset desired orientation
+	fly.reset()
 end
 
 
@@ -50,16 +50,7 @@ function love.load()
 	font = love.graphics.newFont( "RobotoMono-regular.ttf", 16 )
 	love.graphics.setFont(font)
 	
-	controls = {
-		pos = {
-			z = 0
-		},
-		rot = {
-			x = 0,
-			y = 0,
-			z = 0,
-		}
-	}
+	controls = matrix(4,1)
 	
 	networkControls = {}
 	
@@ -96,7 +87,8 @@ function love.update(dt)
 		end
 	end
 	
-	fly.calculateMotors( mode, controls )
+	-- Update motors
+	fly.calculateMotors( mode, controls, dt )
 	
 	-- UDP Send controls to NodeMCU
 	if active then
@@ -114,15 +106,16 @@ function love.update(dt)
 		response = unserialize(response)
 		if response.type == "start" and response.data == "true" then
 			active = true
+		elseif response.type == "sensors" then
+			attitude.orientate(response)
 		end
-		-- attitude.orientate(response)
 	end)
 end
 
 function love.draw()
 	GUIs[mode]:draw()
 	
-	love.graphics.setColor( 255, 255, 255, 255 )
+	love.graphics.setColor( 1, 1, 1, 1 )
 	
 	-- Middle line
 	love.graphics.line( width/2, 0, width/2, height*0.8 )
@@ -131,24 +124,24 @@ function love.draw()
 	love.graphics.line( 0, height*0.8, width, height*0.8 )
 
 	-- Position dots
-	local power	= map( controls.pos.z, 1,0, 0,height*0.8 )
-	local yaw		= map( controls.rot.z, -1,1, 0,width/2 )
-	local pitch	= map( controls.rot.x, -1,1, width/2,width )
-	local roll	= map( controls.rot.y, 1,-1, 0,height*0.8 )
+	local power	= map( controls[3][1], 1, -1, 0,height*0.8 )
+	local yaw		= map( controls[4][1], -1,1, 0,width/2 )
+	local pitch	= map( controls[1][1], 1,-1, 0,height*0.8 )
+	local roll	= map( controls[2][1], -1,1, width/2,width )
 	
 	love.graphics.circle( "fill", yaw, power, 10 )
-	love.graphics.circle( "fill", pitch, roll, 10 )
+	love.graphics.circle( "fill", roll, pitch, 10 )
 
 	-- Position text
-	love.graphics.print( stringify(controls), 20, 20 )
-	love.graphics.print( tostring(networkControls), 20, 20 + font:getHeight() )
+	love.graphics.print( tostring(controls), 20 + width/2, 20 )
+	love.graphics.print( tostring(networkControls), 20, 20 )
 
 	-- Messages
 	for i = 1, #messages do
-		love.graphics.setColor( 255, 255, 255, map( love.timer.getTime()-messages[i].time, 8, 4, 0, 255 ) )
-		love.graphics.printf( tostring(messages[i].text), 20, 20 + (i+1)*font:getHeight(), width-40 )
+		love.graphics.setColor( 1, 1, 1, map( love.timer.getTime()-messages[i].time, 8, 4, 0, 1 ) )
+		love.graphics.printf( tostring(messages[i].text), 20, 20 + (i+2)*font:getHeight(), width-40 )
 	end
-	love.graphics.setColor( 255, 255, 255, 255 )
+	love.graphics.setColor( 1, 1, 1, 1 )
 end
 
 

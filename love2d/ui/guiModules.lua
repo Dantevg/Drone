@@ -46,7 +46,7 @@ function modules.text:new( parent, d )
 		y = d.y or 0,
 		align = d.align or "center",
 		
-		color = d.color or {255,255,255,255},
+		color = d.color or {1,1,1,1},
 		
 		text = d.text or "",
 		
@@ -102,8 +102,8 @@ function modules.button:new( parent, d )
 		h = d.h or 0,
 		
 		bg = d.bg or {0,0,0},
-		fg = d.fg or {255,255,255},
-		bgActive = d.bgActive or {255,255,255},
+		fg = d.fg or {1,1,1},
+		bgActive = d.bgActive or {1,1,1},
 		fgActive = fgActive or {0,0,0},
 		
 		border = d.border or false,

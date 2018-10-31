@@ -30,7 +30,7 @@ buttons.start = GUIs[0]:addChild("button", {
 	y = buttonY,
 	w = buttonWidth,
 	h = buttonHeight,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text", {
 			text = "START",
@@ -49,7 +49,7 @@ buttons.calibrateSensors = GUIs[0]:addChild("button", {
 	y = buttonY,
 	w = buttonWidth,
 	h = buttonHeight,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			text = "CALIBRATE SENSORS",
@@ -68,7 +68,7 @@ buttons.mode = GUIs[0]:addChild("button", {
 	y = buttonY,
 	w = buttonWidth * 0.75,
 	h = buttonHeight,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			id = "title",
@@ -88,7 +88,7 @@ buttons.modeUp = buttons.mode:addChild("button", {
 	y = 0,
 	w = buttonWidth * 0.25,
 	h = buttonHeight * 0.5,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			text = "+",
@@ -107,7 +107,7 @@ buttons.modeDown = buttons.mode:addChild("button", {
 	y = buttonHeight * 0.5,
 	w = buttonWidth * 0.25,
 	h = buttonHeight * 0.5,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			text = "-",
@@ -126,7 +126,7 @@ buttons.takeOff = GUIs[1]:addChild("button", {
 	y = buttonY,
 	w = buttonWidth,
 	h = buttonHeight,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			text = "TAKE OFF",
@@ -145,7 +145,7 @@ buttons.land = GUIs[1]:addChild("button", {
 	y = buttonY,
 	w = buttonWidth,
 	h = buttonHeight,
-	border = {255,255,255},
+	border = {1,1,1},
 	objects = {
 		{"text",{
 			text = "LAND",
@@ -167,3 +167,9 @@ GUIs[2]:addChild(buttons.calibrateSensors)
 GUIs[2]:addChild(buttons.mode)
 GUIs[2]:addChild(buttons.takeOff)
 GUIs[2]:addChild(buttons.land)
+
+GUIs[3]:addChild(buttons.start)
+GUIs[3]:addChild(buttons.calibrateSensors)
+GUIs[3]:addChild(buttons.mode)
+GUIs[3]:addChild(buttons.takeOff)
+GUIs[3]:addChild(buttons.land)
