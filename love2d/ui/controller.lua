@@ -34,12 +34,14 @@ function controller.getFromTouch(touches)
 
 	for i, id in ipairs(touches) do
 		local x, y = love.touch.getPosition(id)
-		if x < width/2 then -- Left pad
-			controls[3][1] = map( y, 0, height*0.8, 1, -1 ) -- z/up
-			controls[4][1] = map( x, 0, width/2, -1, 1 ) -- z/yaw
-		else -- Right pad
-			controls[1][1] = map( y, 0, height*0.8, 1, -1 ) -- x/roll/forward
-			controls[2][1] = map( x, width/2, width, -1, 1 ) -- y/pitch/right
+		if y < height*0.8 then -- Inside controller area
+			if x < width/2 then -- Left pad
+				controls[3][1] = map( y, 0, height*0.8, 1, -1 ) -- z/up
+				controls[4][1] = map( x, 0, width/2, -1, 1 ) -- z/yaw
+			else -- Right pad
+				controls[1][1] = map( y, 0, height*0.8, 1, -1 ) -- x/roll/forward
+				controls[2][1] = map( x, width/2, width, -1, 1 ) -- y/pitch/right
+			end
 		end
 	end
 
@@ -68,8 +70,8 @@ function controller.serializeMotors(values)
 	if not values then return "nil" end
 	
 	return {
-		option = "fly",
-		motors = {
+		fn = "fly",
+		data = {
 			constrain( round(values[1][1], 2), 0, 1 ),
 			constrain( round(values[1][2], 2), 0, 1 ),
 			constrain( round(values[2][1], 2), 0, 1 ),

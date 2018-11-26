@@ -68,7 +68,7 @@ end
 function attitude.orientate(sensorData)
 	local pos = attitude.orientation.position
 	local rot = attitude.orientation.rotation
-	local interval = love.timer.getTime() - attitude.previousSensor
+	local interval = love.timer.getTime() - (attitude.previousSensor or 0 )
 	local sensors = { acc = {}, gyro = {} }
 	
 	attitude.previousSensor = love.timer.getTime()

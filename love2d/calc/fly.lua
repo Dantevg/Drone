@@ -120,6 +120,8 @@ function fly.calibrateMotors() -- TODO: make calibrating function
 	
 end
 
+fly.orientate = attitude.orientate
+
 
 
 

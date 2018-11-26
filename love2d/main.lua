@@ -13,7 +13,7 @@
 
 require "utils"
 matrix = require "matrix"
-local socket = require "socket"
+socket = require "socket"
 local net = require "net"
 local fly = require "calc/fly"
 local controller = require "ui/controller"
@@ -47,7 +47,8 @@ function love.load()
 	love.window.setMode( 800, 450 )
 	width, height = love.graphics.getWidth(), love.graphics.getHeight()
 	
-	font = love.graphics.newFont( "RobotoMono-regular.ttf", 16 )
+	-- Size 16 for desktop/laptop, size 32 for mobile (high-dpi)
+	font = love.graphics.newFont( "RobotoMono-Regular.ttf", 16 )
 	love.graphics.setFont(font)
 	
 	controls = matrix(4,1)
@@ -107,7 +108,7 @@ function love.update(dt)
 		if response.type == "start" and response.data == "true" then
 			active = true
 		elseif response.type == "sensors" then
-			attitude.orientate(response)
+			-- fly.orientate(response)
 		end
 	end)
 end
@@ -115,7 +116,7 @@ end
 function love.draw()
 	GUIs[mode]:draw()
 	
-	love.graphics.setColor( 1, 1, 1, 1 )
+	love.graphics.setColor( 255, 255, 255, 255 )
 	
 	-- Middle line
 	love.graphics.line( width/2, 0, width/2, height*0.8 )
@@ -138,10 +139,10 @@ function love.draw()
 
 	-- Messages
 	for i = 1, #messages do
-		love.graphics.setColor( 1, 1, 1, map( love.timer.getTime()-messages[i].time, 8, 4, 0, 1 ) )
+		love.graphics.setColor( 255,255,255, map( love.timer.getTime()-messages[i].time, 8, 4, 0, 255 ) )
 		love.graphics.printf( tostring(messages[i].text), 20, 20 + (i+2)*font:getHeight(), width-40 )
 	end
-	love.graphics.setColor( 1, 1, 1, 1 )
+	love.graphics.setColor( 255, 255, 255, 255 )
 end
 
 

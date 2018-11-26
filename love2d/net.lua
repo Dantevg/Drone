@@ -9,20 +9,17 @@
 
 local module = {}
 
-local ip = "192.168.1.103"
-local port = "5000"
+local ip = "192.168.4.1"
+local port = 5000
 
 module.udp = false
 
 function module.start()
 	module.udp = socket.udp()
 	module.udp:settimeout(0)
-	module.udp:setsockname("*", 5000)
-	module.udp:setpeername(ip, port)
+	module.udp:setsockname( "*", 5001 )
 	
-	module.send{
-		fn = "start"
-	}
+	module.udp:sendto( stringify{fn="start"}, ip, port )
 end
 
 function module.send(data)
@@ -31,10 +28,7 @@ function module.send(data)
 		return
 	end
 	
-	-- Add ip and port to return to
-	data.ip, data.port = module.udp:getsockname()
-	
-	module.udp:send( stringify(data) )
+	module.udp:sendto( stringify(data), ip, port )
 end
 
 function module.receive(callback)

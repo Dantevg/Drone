@@ -1,3 +1,12 @@
+--[[
+	
+	UTILS v1.0
+	by RedPolygon
+	
+	Just some little functions that should be in standard Lua imo
+	
+--]]
+
 function round(n, decimals)
 	local mult = 10 ^ ( decimals or 0 )
 	if n >= 0 then
@@ -26,6 +35,9 @@ function lerpColor( rgb1, rgb2, t )
 		lerp( rgb1[3], rgb2[3], t )
 end
 
+-- This is just a quick small implementation,
+-- for really simple purposes
+-- Don't use for anything serious
 function stringify(t)
 	local s = "{"
 	for k, v in pairs(t) do

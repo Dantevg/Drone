@@ -1,6 +1,6 @@
 --[[
 	
-	MATRIX MODULE
+	MATRIX MODULE v1.0
 	by RedPolygon
 	
 	All functions (except fill) return new matrices
