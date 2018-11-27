@@ -8,7 +8,7 @@
 -- CONSTANTS
 
 local socket = require "socket" -- Luasocket
-local sensor = require "sensor"
+-- local sensor = require "sensor"
 
 local MAC = "24:0A:C4:9B:3B:0C"
 
@@ -25,7 +25,7 @@ local motorPins = {
 
 local ip, port = nil, nil
 
-local sensors = {}
+sensors = {}
 
 
 
@@ -48,13 +48,6 @@ function stringify(t)
 		end
 	end
 	return s .. "}"
-end
-
-function updateSensors()
-	sensors = {
-		acc = sensor.read("acc"),
-		gyro = sensor.read("gyro")
-	}
 end
 
 
@@ -176,6 +169,9 @@ for i = 1, #motorPins do
 	-- pwm.attach( pin, freq (Hz), duty [0-1] )
 	motorPins[i].pwm = pwm.attach( motorPins[i].pin, 1000, 0 )
 end
+
+-- Start sensor thread
+local sensorThread = thread.start( loadfile("sensor.lua") )
 
 -- Start main loop
 log("STARTED")

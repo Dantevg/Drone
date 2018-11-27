@@ -18,7 +18,7 @@
 
 -- CONSTANTS
 
-local module = {}
+sensor = {}
 
 -- The numbers which the sensor data needs to be multiplied with
 local sensitivities = {
@@ -84,7 +84,7 @@ local scales = {
 
 -- VARIABLES
 
-module.settings = {
+sensor.settings = {
 	-- The pins used for i2c SDA and SCL
 	i2cSDA = i2c.I2C0,
 	
@@ -106,9 +106,9 @@ module.settings = {
 
 -- FUNCTIONS
 
-function module.read(sensor)
-	if sensor ~= "acc" and sensor ~= "gyro" then
-		error("Invalid sensor type: " .. (sensor ~= nil and sensor or "nil"))
+function sensor.read(s)
+	if s ~= "acc" and s ~= "gyro" then
+		error("Invalid sensor type: " .. (s ~= nil and s or "nil"))
 	end
 	
 	local sensorData = { x=0, y=0, z=0 }
@@ -116,9 +116,9 @@ function module.read(sensor)
 	
 	-- Read 6 bytes from registers starting at x[1]
 	-- x, y, z values, 2 bytes per value
-	if sensor == "acc" then
+	if s == "acc" then
 		rawData = i2cRead( addrAccGyro, regAccGyro.accX[1], 6 )
-	elseif sensor == "gyro" then
+	elseif s == "gyro" then
 		rawData = i2cRead( addrAccGyro, regAccGyro.gyroX[1], 6 )
 	end
 	
@@ -128,12 +128,12 @@ function module.read(sensor)
 	sensorData.z = rawData[5] | (rawData[6] << 8)
 	
 	-- Multiply by sensitivity
-	local sensitivity = sensitivities[sensor][module.settings[sensor].scale]
+	local sensitivity = sensitivities[s][sensor.settings[s].scale]
 	sensorData.x = sensorData.x * sensitivity
 	sensorData.y = sensorData.y * sensitivity
 	sensorData.z = sensorData.z * sensitivity
 	
-	return sensorData
+	sensors[s] = sensorData
 end
 
 -- Sets the acc's control registers
@@ -145,8 +145,8 @@ function initAcc()
 	-- BWMOD: Bandwidth auto or manual
 	-- BW: Bandwidth
 	
-	ctrl6 = module.settings.acc.sampleRate << 5 -- ODR
-	ctrl6 = ctrl6 | (scales.acc[module.settings.acc.scale] << 3)-- SCL
+	ctrl6 = sensor.settings.acc.sampleRate << 5 -- ODR
+	ctrl6 = ctrl6 | (scales.acc[sensor.settings.acc.scale] << 3)-- SCL
 	i2cWrite( addrAccGyro, regAccGyro.ctrl6, ctrl6 ) -- Send
 end
 
@@ -158,9 +158,9 @@ function initGyro()
 	-- SCL: Scale (FS)
 	-- BW: Bandwidth
 	
-	ctrl1 = module.settings.gyro.sampleRate << 5 -- ODR
-	ctrl1 = ctrl1 | (scales.gyro[module.settings.gyro.scale] << 3) -- SCL
-	ctrl1 = ctrl1 | module.settings.gyro.bandwidth -- BW
+	ctrl1 = sensor.settings.gyro.sampleRate << 5 -- ODR
+	ctrl1 = ctrl1 | (scales.gyro[sensor.settings.gyro.scale] << 3) -- SCL
+	ctrl1 = ctrl1 | sensor.settings.gyro.bandwidth -- BW
 	i2cWrite( addrAccGyro, regAccGyro.ctrl1, ctrl1 ) -- Send
 end
 
@@ -216,9 +216,12 @@ end
 
 -- START
 
-local comm = i2c.attach( module.settings.i2cSDA, i2c.MASTER ) -- Setup i2c
+local comm = i2c.attach( sensor.settings.i2cSDA, i2c.MASTER ) -- Setup i2c
 
 initAcc()
 initGyro()
 
-return module
+updateTimer = tmr.attach( 100000, sensor.update() ) -- Update sensors every 100ms (100000us)
+updateTimer:start()
+
+-- return sensor
