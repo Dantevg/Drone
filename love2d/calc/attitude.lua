@@ -66,6 +66,8 @@ end
 
 -- Update the sensor data and covert it
 function attitude.orientate(sensorData)
+	local prevAltitude = attitude.orientation.position[3]
+	
 	local pos = attitude.orientation.position
 	local rot = attitude.orientation.rotation
 	local interval = love.timer.getTime() - (attitude.previousSensor or 0 )
@@ -96,6 +98,8 @@ function attitude.orientate(sensorData)
 	
 	attitude.orientation.position = pos
 	attitude.orientation.rotation = rot
+	
+	return attitude.orientation.position.pos[3], prevAltitude
 end
 
 

@@ -63,6 +63,7 @@ function love.load()
 	t = 0
 	
 	messages = {}
+	altitude = 0
 	
 	-- Modes: 0 (full control), 1 (rotation control), 2 (speed control), 3 (position control)
 	mode = 0
@@ -70,6 +71,12 @@ function love.load()
 	
 	require "ui/ui" -- Build the UI
 	matrix.multiply = matrix.hadamard
+	
+	-- Check time
+	local time = os.date("*t")
+	if time.hour > 19 or time.hour < 7 then
+		log("Je mag alleen bij daglicht vliegen")
+	end
 end
 
 function love.update(dt)
@@ -108,7 +115,7 @@ function love.update(dt)
 		if response.type == "start" and response.data == "true" then
 			active = true
 		elseif response.type == "sensors" then
-			-- fly.orientate(response)
+			altitude = fly.orientate(response)
 		end
 	end)
 end
@@ -136,6 +143,7 @@ function love.draw()
 	-- Position text
 	love.graphics.print( tostring(controls), 20 + width/2, 20 )
 	love.graphics.print( tostring(networkControls), 20, 20 )
+	love.graphics.printf( altitude, 20, 20, (width/2)-40, "right" )
 
 	-- Messages
 	for i = 1, #messages do
